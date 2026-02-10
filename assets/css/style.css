@@ -121,8 +121,13 @@ h3 {
 /* About */
 #about p {
     font-size: 1.05rem;
-    max-width: 680px;
     color: var(--text);
+    line-height: 1.7;
+    margin-bottom: 1rem;
+}
+
+#about p:last-of-type {
+    margin-bottom: 0;
 }
 
 /* Skills */
