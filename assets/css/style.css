@@ -118,6 +118,57 @@ h3 {
     color: var(--text-light);
 }
 
+/* Latest */
+#latest {
+    padding-top: 3rem;
+}
+
+.latest-sub {
+    color: var(--text-light);
+    margin-bottom: 1rem;
+}
+
+.latest-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+.latest-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.latest-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.6rem;
+}
+
+.latest-head h3 {
+    margin: 0;
+    font-size: 1.05rem;
+}
+
+.latest-badge {
+    font-size: 0.72rem;
+    border: 1px solid var(--border);
+    background: var(--bg-alt);
+    color: var(--text-light);
+    border-radius: 999px;
+    padding: 0.2rem 0.55rem;
+    font-weight: 700;
+}
+
+.latest-card > p {
+    font-size: 0.93rem;
+    color: var(--text-light);
+    margin-bottom: 0.75rem;
+}
+
 /* About */
 #about p {
     font-size: 1.05rem;
@@ -427,6 +478,10 @@ h3 {
 .contact-links {
     display: flex;
     gap: 1.5rem;
+}
+
+.about-links {
+    margin-top: 1.25rem;
 }
 
 .contact-links a {
