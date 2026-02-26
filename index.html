@@ -16,6 +16,19 @@
 </head>
 
 <body>
+    <div class="lang-switch-container fade-in-up">
+        <button id="lang-toggle" class="lang-toggle" aria-label="Toggle Language">
+            <span class="lang-text">EN</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" style="margin-left: 6px;">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                </path>
+            </svg>
+        </button>
+    </div>
+
     <div class="dashboard-container">
         <!-- Background elements -->
         <div class="glow-orb orb-1"></div>
@@ -23,7 +36,7 @@
 
         <header class="dashboard-header fade-in-up">
             <h1>Chenjae's <span class="text-gradient">Workspace</span></h1>
-            <p>Welcome to the main dashboard. Explore tools, news, and portfolio.</p>
+            <p data-i18n="desc">메인 대시보드입니다. 도구, 뉴스 및 포트폴리오를 탐색해 보세요.</p>
         </header>
 
         <main class="dashboard-grid">
@@ -37,9 +50,9 @@
                     </svg>
                 </div>
                 <h2>Dev Tools</h2>
-                <p>A collection of useful development tools and utilities.</p>
+                <p data-i18n="dev_tools_desc">유용한 개발 도구 및 유틸리티 모음입니다.</p>
                 <div class="card-action">
-                    <span>Launch App</span>
+                    <span data-i18n="launch_app">앱 실행하기</span>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -58,9 +71,9 @@
                     </svg>
                 </div>
                 <h2>Daily News</h2>
-                <p>Automated AI-curated daily news and tech updates.</p>
+                <p data-i18n="daily_news_desc">AI가 매일 큐레이션해주는 IT 뉴스 및 기술 업데이트입니다.</p>
                 <div class="card-action">
-                    <span>Read Now</span>
+                    <span data-i18n="read_now">지금 읽어보기</span>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -79,9 +92,9 @@
                     </svg>
                 </div>
                 <h2>Portfolio</h2>
-                <p>My personal portfolio, experience, and projects.</p>
+                <p data-i18n="portfolio_desc">개인 포트폴리오, 경력 및 프로젝트 소개입니다.</p>
                 <div class="card-action">
-                    <span>View Profile</span>
+                    <span data-i18n="view_profile">프로필 보기</span>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -92,9 +105,70 @@
         </main>
 
         <footer class="dashboard-footer fade-in-up stagger-4">
-            <p>&copy; 2026 Chenjae. All rights reserved.</p>
+            <p data-i18n="footer">&copy; 2026 Chenjae. All rights reserved.</p>
         </footer>
     </div>
+
+    <script>
+        const translations = {
+            ko: {
+                desc: "메인 대시보드입니다. 도구, 뉴스 및 포트폴리오를 탐색해 보세요.",
+                dev_tools_desc: "유용한 개발 도구 및 유틸리티 모음입니다.",
+                launch_app: "앱 실행하기",
+                daily_news_desc: "AI가 매일 큐레이션해주는 IT 뉴스 및 기술 업데이트입니다.",
+                read_now: "지금 읽어보기",
+                portfolio_desc: "개인 포트폴리오, 경력 및 프로젝트 소개입니다.",
+                view_profile: "프로필 보기",
+                footer: "&copy; 2026 Chenjae. All rights reserved."
+            },
+            en: {
+                desc: "Welcome to the main dashboard. Explore tools, news, and portfolio.",
+                dev_tools_desc: "A collection of useful development tools and utilities.",
+                launch_app: "Launch App",
+                daily_news_desc: "Automated AI-curated daily news and tech updates.",
+                read_now: "Read Now",
+                portfolio_desc: "My personal portfolio, experience, and projects.",
+                view_profile: "View Profile",
+                footer: "&copy; 2026 Chenjae. All rights reserved."
+            }
+        };
+
+        const langToggleBtn = document.getElementById('lang-toggle');
+        const langTextSpan = langToggleBtn.querySelector('.lang-text');
+
+        // Handle init (default Korean)
+        let currentLang = localStorage.getItem('dashboard_lang') || 'ko';
+
+        function applyLanguage(lang) {
+            document.documentElement.lang = lang;
+
+            // Set toggle text to the opposite language
+            langTextSpan.textContent = lang === 'ko' ? 'EN' : 'KR';
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    el.innerHTML = translations[lang][key];
+                }
+            });
+        }
+
+        // Initial apply
+        applyLanguage(currentLang);
+
+        // Toggle event
+        langToggleBtn.addEventListener('click', () => {
+            currentLang = currentLang === 'ko' ? 'en' : 'ko';
+            localStorage.setItem('dashboard_lang', currentLang);
+            applyLanguage(currentLang);
+
+            // Bounce animation effect
+            langToggleBtn.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                langToggleBtn.style.transform = 'scale(1)';
+            }, 100);
+        });
+    </script>
 </body>
 
 </html>
