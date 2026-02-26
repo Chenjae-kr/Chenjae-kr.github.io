@@ -12,6 +12,8 @@
     /* Pink */
     --accent-3: #14b8a6;
     /* Teal */
+    --accent-4: #f97316;
+    /* Orange (Tistory) */
 
     --glow-opacity: 0.4;
 }
@@ -28,6 +30,7 @@
     --accent-1: #4f46e5;
     --accent-2: #db2777;
     --accent-3: #0d9488;
+    --accent-4: #ea580c;
 
     --glow-opacity: 0.15;
 }
@@ -198,6 +201,10 @@ body {
     color: var(--accent-2);
 }
 
+.blog-icon {
+    color: var(--accent-4);
+}
+
 .glass-card h2 {
     font-family: 'Outfit', sans-serif;
     font-size: 2rem;
@@ -235,6 +242,10 @@ body {
 
 .glass-card:nth-child(3):hover .card-action {
     color: var(--accent-2);
+}
+
+.glass-card:nth-child(4):hover .card-action {
+    color: var(--accent-4);
 }
 
 .dashboard-footer {
