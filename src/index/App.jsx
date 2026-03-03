@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import ClickSpark from './components/ClickSpark'
 
 const translations = {
   ko: {
@@ -84,6 +85,7 @@ export default function App() {
 
   return (
     <>
+      <ClickSpark color="99,102,241" />
       <section className="control-section" data-section="controls">
         <div className="controls-container fade-in-up">
           <button id="theme-toggle" className="toggle-btn" aria-label="Toggle Theme" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
