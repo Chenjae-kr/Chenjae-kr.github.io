@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build:404": "vite build --config vite.404.config.mjs"
+    "build:404": "vite build --config vite.404.config.mjs",
+    "build:index": "vite build --config vite.index.config.mjs",
+    "build:pages": "npm run build:index && npm run build:404"
   },
   "repository": {
     "type": "git",
