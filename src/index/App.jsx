@@ -85,7 +85,15 @@ export default function App() {
 
   return (
     <>
-      <ClickSpark color="99,102,241" />
+      <ClickSpark
+        sparkColor="#ffffff"
+        sparkSize={10}
+        sparkRadius={15}
+        sparkCount={8}
+        duration={400}
+        easing="ease-out"
+        extraScale={1}
+      />
       <section className="control-section" data-section="controls">
         <div className="controls-container fade-in-up">
           <button id="theme-toggle" className="toggle-btn" aria-label="Toggle Theme" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
