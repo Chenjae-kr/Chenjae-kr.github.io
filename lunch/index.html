@@ -185,6 +185,12 @@ body{background:#faf8f5;color:#282728}
 .food-photo-label{display:block;text-align:center;white-space:nowrap;font-weight:750;font-size:13px;padding:11px 2px;color:#292726;line-height:1.25}
 .food-photo-button.active .food-photo-label{color:#292726}
 @media(max-width:720px){#teamCategoryButtons,#categories{gap:7px;padding-bottom:10px}.food-photo-button{flex:0 0 84px;min-width:84px;max-width:84px;border-radius:12px}.category-photo{border-radius:9px}.food-photo-label{font-size:12px;padding:10px 1px}}
+</style><style id="simple-recommend-toolbar">
+#recommendPanel .team-head{margin-bottom:14px}
+#recommendPanel .team-toolbar{display:flex;align-items:end;gap:10px;flex-wrap:nowrap}
+#recommendPanel .team-toolbar>label:first-child{flex:1;min-width:0;max-width:280px}
+#recommendPanel #teamReroll{flex:1;min-width:0;margin:0;white-space:normal;min-height:43px}
+@media(max-width:760px){#recommendPanel .team-toolbar>label:first-child{max-width:none}#recommendPanel #teamReroll{flex-basis:auto}}
 </style></head>
 <body>
 <div id="runtimeNotice" role="alert"><strong>⚠️ 버튼이 눌리지 않나요?</strong>HTML 미리보기에서는 버튼이 작동하지 않을 수 있습니다. <b>웹사이트 주소를 Safari 또는 Chrome에서 열어 주세요.</b></div>
@@ -194,12 +200,10 @@ body{background:#faf8f5;color:#282728}
 <div class="wrap team-wrap" id="recommendPanel" role="tabpanel" aria-labelledby="tabRecommend">
   <section class="team-hero" aria-labelledby="team-heading">
     <div class="section-kicker" style="color:#bbddc6">대신파이낸스센터 · 점심</div>
-    <div class="team-head"><div><h1 id="team-heading">오늘의 점심 <em>3곳</em></h1></div><div class="team-date" id="teamDate"></div></div>
+    <div class="team-head"><div><h1 id="team-heading">오늘의 점심 <em>3곳</em></h1></div></div>
     <div class="team-toolbar">
       <label>1인 예산 <select id="teamBudget" aria-label="추천 1인 예산"><option value="15000">15,000원 이하</option><option value="10000">10,000원 이하</option><option value="12000">12,000원 이하</option><option value="20000">20,000원 이하</option><option value="0">가격 제한 없음</option></select></label>
       <label class="category-select-label">음식 종류 <select id="teamCategory" aria-label="추천 음식 종류"><option value="전체">전체 메뉴</option><option value="한식">한식</option><option value="중식">중식</option><option value="일식">일식</option><option value="양식">양식</option><option value="분식">분식</option><option value="아시아·세계">아시아·세계</option><option value="구내식당">구내식당</option></select></label>
-      <label class="team-check"><input type="checkbox" id="teamNearby" checked> 가까운 곳 우선</label>
-      <label class="team-check"><input type="checkbox" id="teamRecent" checked> 최근 5회 방문 제외</label>
       <button type="button" class="btn team-refresh" id="teamReroll">↻ 후보 다시 뽑기</button>
     </div>
     <div class="category-visual-wrap" aria-labelledby="teamCategoryVisualTitle">
@@ -210,7 +214,7 @@ body{background:#faf8f5;color:#282728}
   <div class="team-subhead"><h2>오늘의 후보 <span class="team-subcount" id="teamShownCount">3곳</span></h2><div class="team-status-note" id="teamStatus" role="status" aria-live="polite"></div></div>
   <div id="teamCards" class="team-grid"></div>
   <div class="team-picked" id="teamPicked" hidden></div>
-  <p class="team-caveat">※ 가격·영업시간은 변동될 수 있습니다. 근처 우선은 도보거리 계산 기준이 아닙니다.</p>
+  <p class="team-caveat">※ 가격·영업시간은 변동될 수 있습니다.</p>
 </div>
 <div class="wrap hero" hidden>
   <div class="hero-grid">
@@ -547,7 +551,7 @@ const day=new Intl.DateTimeFormat('ko-KR',{month:'long',day:'numeric',weekday:'s
 renderAll();
 
 // Three-restaurant decision panel. No polls or votes.
-const prefs={budget:15000,category:'전체',nearby:true,excludeRecent:true,...state.teamPrefs};
+const prefs={budget:state.teamPrefs?.budget??15000,category:state.teamPrefs?.category??'전체'};
 function renderTeamCategoryButtons(){
  const row=$('teamCategoryButtons');if(!row)return;
  renderPhotoCategories(row,categories.slice(0,8),prefs.category,value=>{prefs.category=value;$('teamCategory').value=value;newTeam(true);});
@@ -560,11 +564,9 @@ function teamMenu(r){
  if(!ms.length)return null;
  return ms.slice().sort((a,b)=>priority(b)-priority(a)||((a.price??999999)-(b.price??999999)))[0];
 }
-function teamPool(){const recent=recentIds();return all.filter(r=>
+function teamPool(){return all.filter(r=>
   !state.hidden.includes(r.id)&&
-  (prefs.category==='전체'||r.category===prefs.category)&&
-  (!prefs.nearby||r.nearby||r.id===41||r.id===73)&&
-  (!prefs.excludeRecent||!recent.has(r.id))
+  (prefs.category==='전체'||r.category===prefs.category)
  ).map(r=>({r,m:teamMenu(r)})).filter(x=>x.m);}
 function teamKey(){return JSON.stringify({p:prefs,day:seedDay(),recent:state.history.length,hidden:state.hidden.slice().sort((a,b)=>a-b)});}
 function persistTeam(){state.teamPrefs={...prefs};state.teamSession={day:seedDay(),key:teamKey(),ids:currentPicks.map(x=>x.r.id),chosenId};persist();}
@@ -579,9 +581,9 @@ function newTeam(force=false){
    if(chosen.length&&prefs.category==='전체'){
      const diff=candidates.filter(x=>!chosen.some(y=>y.r.category===x.r.category));if(diff.length)opts=diff;
    }
-   // Newly reviewed nearby sources receive priority even without a precise distance measure.
-   opts=opts.slice().sort((a,b)=>((b.r.nearby?1:0)-(a.r.nearby?1:0))||((b.m.price!=null?1:0)-(a.m.price!=null?1:0)));
-   const top=opts.filter(x=>(!!x.r.nearby)===(!!opts[0].r.nearby)&&((x.m.price!=null)===(opts[0].m.price!=null)));
+   // Prefer known menu prices without prioritizing by location or visit history.
+   const priced=opts.filter(x=>x.m.price!=null);
+   const top=priced.length?priced:opts;
    const selected=top[Math.floor(Math.random()*top.length)];
    chosen.push(selected);candidates=candidates.filter(x=>x.r.id!==selected.r.id);
  }
@@ -599,7 +601,7 @@ function drawTeamCard(x,i){
 }
 function renderTeam(){
  $('teamBudget').value=String(prefs.budget);$('teamCategory').value=prefs.category;
- $('teamNearby').checked=prefs.nearby;$('teamRecent').checked=prefs.excludeRecent;renderTeamCategoryButtons();
+ renderTeamCategoryButtons();
  $('teamCards').replaceChildren(...currentPicks.map(drawTeamCard));
  $('teamShownCount').textContent=currentPicks.length+'곳';
  $('teamStatus').textContent='조건 일치 '+teamPool().length+'곳';
@@ -612,10 +614,7 @@ function renderTeam(){
 }
 $('teamBudget').onchange=e=>{prefs.budget=+e.target.value;newTeam(true);};
 $('teamCategory').onchange=e=>{prefs.category=e.target.value;newTeam(true);};
-$('teamNearby').onchange=e=>{prefs.nearby=e.target.checked;newTeam(true);};
-$('teamRecent').onchange=e=>{prefs.excludeRecent=e.target.checked;newTeam(true);};
 $('teamReroll').onclick=()=>newTeam(true);
-$('teamDate').textContent=new Intl.DateTimeFormat('ko-KR',{month:'long',day:'numeric',weekday:'short'}).format(new Date());
 if(teamState?.day===seedDay()&&teamState.key===teamKey()&&Array.isArray(teamState.ids)&&teamState.ids.length){
  const pool=teamPool();currentPicks=teamState.ids.map(id=>pool.find(x=>x.r.id===id)).filter(Boolean);
  if(currentPicks.length===teamState.ids.length){chosenId=teamState.chosenId||null;previousIds=currentPicks.map(x=>x.r.id);renderTeam();}else newTeam();
