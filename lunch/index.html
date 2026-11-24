@@ -235,7 +235,8 @@ body{background:#faf8f5;color:#282728}
     <div>
       <section class="panel filter-panel" aria-labelledby="filter-title">
         <div class="title-row"><h2 id="filter-title">식당 검색</h2></div>
-        <div class="search-line"><input class="search" id="search" type="search" placeholder="식당명 또는 메뉴 검색" aria-label="식당과 메뉴 검색" autocomplete="off"></div>
+        <div class="search-line"><input class="search" id="search" type="search" list="menuSuggestions" placeholder="식당명 또는 메뉴 검색" aria-label="식당과 메뉴 검색" autocomplete="off"></div>
+        <datalist id="menuSuggestions"></datalist>
         <div class="category-row category-visual-row" id="categories" role="group" aria-label="음식 종류 필터"></div>
         <div class="type-row" id="types" aria-label="메뉴별 필터"></div>
         <div class="filter-bottom">
@@ -302,11 +303,44 @@ let shownCount=16,selectedId=null,selectedMenu=null,lastRecommendedIds=[];
 const fmt=v=>v==null?'가격 확인 필요':Number(v).toLocaleString('ko-KR')+'원';
 const esc=x=>String(x??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const isMeal=m=>m.type!=='사이드·디저트' && !/^(?:참치마요|연어톡톡와사비|반쎄오\(1개\)|새우춘권|아르베키나|장인볶음밥)/.test(m.name) && !(m.price<6000&&m.type==='기타 메뉴');
+function menuFilterType(r,m){
+ if(r.category==='간식·카페'){
+  if(/커피|아메리카노|라떼|에스프레소|카푸치노|콜드브루|카페모카/.test(m.name))return '커피';
+  if(/스무디|주스|에이드|밀크티|음료|차$/.test(m.name))return '음료·차';
+  if(/샌드위치|토스트|베이글|빵|크루아상/.test(m.name))return '베이커리';
+  return '디저트';
+ }
+ return m.type||'기타 메뉴';
+}
+function categoryMenuTypes(category){
+ const counts=new Map();
+ for(const r of all){
+  if(category!=='전체'&&r.category!==category)continue;
+  for(const m of r.menus){const type=menuFilterType(r,m);counts.set(type,(counts.get(type)||0)+1);}
+ }
+ const labels=new Map(quickTypes);
+ return [['전체','전체 메뉴'],...[...counts.keys()].sort((a,b)=>{
+  if(a==='기타 메뉴')return 1;
+  if(b==='기타 메뉴')return -1;
+  return counts.get(b)-counts.get(a)||a.localeCompare(b,'ko');
+ }).map(type=>[type,labels.get(type)||type])];
+}
+function categoryMenuNames(category,type){
+ const names=new Set();
+ for(const r of all){
+  if(category!=='전체'&&r.category!==category)continue;
+  for(const m of r.menus){
+   if(type!=='전체'&&menuFilterType(r,m)!==type)continue;
+   if(m.name)names.add(m.name);
+  }
+ }
+ return [...names].sort((a,b)=>a.localeCompare(b,'ko'));
+}
 function candidates(r){
  const search=filters.search.trim().toLocaleLowerCase('ko');
- const relevant=r.menus.filter(m=>filters.type==='전체'||m.type===filters.type);
+ const relevant=r.menus.filter(m=>filters.type==='전체'||menuFilterType(r,m)===filters.type);
  let valid=relevant.filter(m=>(filters.minPrice===0&&filters.maxPrice===60000)||(m.price!=null&&m.price>=filters.minPrice&&(filters.maxPrice===60000||m.price<=filters.maxPrice)));
- if(search){let s=search.replace(/\s+/g,'');let hay=(r.name+' '+r.address).toLocaleLowerCase('ko').replace(/\s+/g,'');if(!hay.includes(s))valid=valid.filter(m=>(m.name+' '+m.type).toLocaleLowerCase('ko').replace(/\s+/g,'').includes(s));}
+ if(search){let s=search.replace(/\s+/g,'');let hay=(r.name+' '+r.address).toLocaleLowerCase('ko').replace(/\s+/g,'');if(!hay.includes(s))valid=valid.filter(m=>(m.name+' '+menuFilterType(r,m)).toLocaleLowerCase('ko').replace(/\s+/g,'').includes(s));}
  return valid;
 }
 function priority(m){let p=m.price,score=0;
@@ -350,7 +384,27 @@ function renderPhotoCategories(row,values,selected,onClick){
  row.replaceChildren(...values.map(v=>categoryPhotoButton(v,selected===v,onClick)));
  row.scrollLeft=left;if(focused){const match=Array.from(row.children).find(b=>b.dataset.category===focused);if(match)match.focus({preventScroll:true});}
 }
-function renderChips(){const cats=$('categories'),types=$('types');renderPhotoCategories(cats,categories,filters.category,v=>{filters.category=v;filters.type='전체';changeFilters();});types.replaceChildren();quickTypes.forEach(([value,label])=>types.append(chip(value,label,filters.type===value,()=>{filters.type=value;changeFilters();})));}
+function renderChips(){
+ const cats=$('categories'),types=$('types');
+ renderPhotoCategories(cats,categories,filters.category,v=>{
+  if(filters.category!==v){filters.category=v;filters.type='전체';types.scrollLeft=0;}
+  changeFilters();
+ });
+ const choices=categoryMenuTypes(filters.category);
+ if(!choices.some(([value])=>value===filters.type))filters.type='전체';
+ const left=types.scrollLeft;
+ const focusType=types.contains(document.activeElement)?document.activeElement.dataset.menuType:null;
+ types.replaceChildren(...choices.map(([value,label])=>{
+  const btn=chip(value,label,filters.type===value,()=>{filters.type=value;changeFilters();});
+  btn.dataset.menuType=value;return btn;
+ }));
+ types.scrollLeft=left;
+ if(focusType){const btn=[...types.children].find(b=>b.dataset.menuType===focusType);if(btn)btn.focus({preventScroll:true});}
+ const list=$('menuSuggestions');
+ if(list)list.replaceChildren(...categoryMenuNames(filters.category,filters.type).map(name=>{
+  const option=document.createElement('option');option.value=name;return option;
+ }));
+}
 function drawCard(r){
  const m=r.shownMenu, fav=state.favorites.includes(r.id);
  const card=document.createElement('article');card.className='rest-card';card.id='restaurant-'+r.id;
