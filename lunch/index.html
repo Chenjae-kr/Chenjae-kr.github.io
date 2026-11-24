@@ -167,12 +167,21 @@ body{background:#faf8f5;color:#282728}
 .price-thumb.dragging{z-index:4!important}
 #priceReset{background:none;border:0;padding:4px;color:#a75d41;font-size:11px}
 @media(max-width:720px){.filter-selects .price-range{flex-basis:100%}.filter-selects #sort{flex-basis:100%}}
+</style><style id="lunch-tabs-style">
+.lunch-tabs{position:sticky;top:0;z-index:20;background:var(--bg);padding-top:12px;padding-bottom:6px}
+.lunch-tab-list{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;background:#eee9e4;border-radius:13px}
+.lunch-tab-list button{appearance:none;border:0;border-radius:10px;min-height:46px;background:transparent;color:#77716d;font-weight:750;font-size:15px;cursor:pointer}
+.lunch-tab-list button[aria-selected=true]{background:#fff;color:#b75531;box-shadow:0 2px 7px #3020100e}
+.lunch-tab-list button:focus-visible{outline:2px solid #c7653f;outline-offset:1px}
+#recommendPanel,#browse{padding-top:14px}
+@media(max-width:720px){.lunch-tabs{padding-top:8px}.lunch-tab-list button{min-height:43px}}
 </style></head>
 <body>
 <div id="runtimeNotice" role="alert"><strong>⚠️ 버튼이 눌리지 않나요?</strong>HTML 미리보기에서는 버튼이 작동하지 않을 수 있습니다. <b>웹사이트 주소를 Safari 또는 Chrome에서 열어 주세요.</b></div>
 <header class="site-head"><div class="wrap head-inner"><div class="brand"><span class="brand-mark" aria-hidden="true">🍽</span> 점심수첩</div><div class="head-meta">📍 서울 중구 삼일대로 343<br>대신파이낸스센터 주변</div></div></header>
 
-<div class="wrap team-wrap">
+<nav class="wrap lunch-tabs" aria-label="점심수첩 메뉴"><div class="lunch-tab-list" role="tablist"><button type="button" id="tabRecommend" role="tab" aria-selected="true" aria-controls="recommendPanel">오늘의 추천</button><button type="button" id="tabSearch" role="tab" aria-selected="false" aria-controls="browse" tabindex="-1">식당 검색</button></div></nav>
+<div class="wrap team-wrap" id="recommendPanel" role="tabpanel" aria-labelledby="tabRecommend">
   <section class="team-hero" aria-labelledby="team-heading">
     <div class="section-kicker" style="color:#bbddc6">대신파이낸스센터 · 점심</div>
     <div class="team-head"><div><h1 id="team-heading">오늘의 점심 <em>3곳</em></h1></div><div class="team-date" id="teamDate"></div></div>
@@ -211,7 +220,7 @@ body{background:#faf8f5;color:#282728}
     </section>
   </div>
 </div>
-<div class="wrap content" id="browse">
+<div class="wrap content" id="browse" role="tabpanel" aria-labelledby="tabSearch" hidden>
   <div class="workspace">
     <div>
       <section class="panel filter-panel" aria-labelledby="filter-title">
@@ -380,7 +389,7 @@ function suggest(force=false){let list=filtered();const meals=list.filter(r=>isM
 }
 function changeFilters(){shownCount=16;lastRecommendedIds=[];renderChips();renderResults();suggest(false);}
 function renderAll(){renderChips();renderResults();renderSide();suggest(false);}
-function showRestaurant(id){const r=byId.get(id);if(!r)return;filters={category:'전체',type:'전체',search:r.name,minPrice:0,maxPrice:60000,sort:'default',favoriteOnly:false,excludeRecent:false};syncFilters();changeFilters();requestAnimationFrame(()=>{let e=$('restaurant-'+id);if(e){e.scrollIntoView({behavior:'smooth',block:'center'});e.querySelector('details').open=true;}});}
+function showRestaurant(id){const r=byId.get(id);if(!r)return;switchLunchTab('search',false);filters={category:'전체',type:'전체',search:r.name,minPrice:0,maxPrice:60000,sort:'default',favoriteOnly:false,excludeRecent:false};syncFilters();changeFilters();requestAnimationFrame(()=>{let e=$('restaurant-'+id);if(e){e.scrollIntoView({behavior:'smooth',block:'center'});e.querySelector('details').open=true;}});}
 function syncFilters(){$('search').value=filters.search;syncPriceRange();$('sort').value=filters.sort;$('favoriteOnly').checked=filters.favoriteOnly;$('excludeRecent').checked=filters.excludeRecent;}
 function clearFilters(){filters={category:'전체',type:'전체',search:'',minPrice:0,maxPrice:60000,sort:'default',favoriteOnly:false,excludeRecent:true};syncFilters();changeFilters();}
 function renderDialog(){const hidden=$('hiddenList');hidden.replaceChildren();if(!state.hidden.length)hidden.innerHTML='<div class="muted">숨긴 식당이 없어요.</div>';else state.hidden.forEach(id=>{let r=byId.get(id);if(!r)return;const div=document.createElement('div');div.className='mini-item';div.innerHTML=`<strong>${esc(r.emoji)} ${esc(r.name)}</strong><button type="button">복원</button>`;div.querySelector('button').onclick=()=>{state.hidden=state.hidden.filter(x=>x!==id);persist();renderAll();renderDialog();};hidden.append(div);});
@@ -559,6 +568,23 @@ if(teamState?.day===seedDay()&&teamState.key===teamKey()&&Array.isArray(teamStat
 }else newTeam();
 $('totalCount').textContent=all.length;
 // Interactive initialization completed successfully.
+function switchLunchTab(tab,scroll=true){
+ const recommend=tab!=='search';
+ $('recommendPanel').hidden=!recommend;$('browse').hidden=recommend;
+ for(const [id,active] of [['tabRecommend',recommend],['tabSearch',!recommend]]){
+  const btn=$(id);btn.setAttribute('aria-selected',String(active));btn.tabIndex=active?0:-1;
+ }
+ if(scroll)window.scrollTo({top:0,behavior:'auto'});
+}
+$('tabRecommend').onclick=()=>switchLunchTab('recommend');
+$('tabSearch').onclick=()=>switchLunchTab('search');
+for(const id of ['tabRecommend','tabSearch'])$(id).addEventListener('keydown',e=>{
+ if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;
+ e.preventDefault();
+ const next=e.key==='Home'?'recommend':e.key==='End'?'search':id==='tabRecommend'?'search':'recommend';
+ switchLunchTab(next);$(next==='recommend'?'tabRecommend':'tabSearch').focus();
+});
+
 document.getElementById('runtimeNotice').hidden=true;
 document.body.dataset.appReady='true';
 
