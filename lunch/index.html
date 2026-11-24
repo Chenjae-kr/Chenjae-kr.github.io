@@ -149,7 +149,23 @@ body{background:#faf8f5;color:#282728}
 .team-empty,.empty{border-color:#ddd2c8;color:#6c625c}
 @media(max-width:760px){.team-hero{padding:19px 16px}.category-visual-label{font-size:12px}}
 </style>
-</head>
+<style id="price-range-style">
+.filter-selects{flex-wrap:wrap;align-items:center}
+.price-range{flex:1 1 230px;min-width:0;padding:10px 12px;background:#fff;border:1px solid #e9e4df;border-radius:12px}
+.price-range-head,.price-range-ends{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;color:#77716d}
+.price-range-head label{font-weight:750;color:#403a37}
+#priceRangeValue{color:#a74e30;font-weight:750;text-align:right}
+.price-slider{height:38px;position:relative;margin:2px 10px}
+.price-track{position:absolute;top:16px;height:6px;left:0;right:0;border-radius:8px;background:#e9e4df}
+#priceFill{position:absolute;top:0;bottom:0;left:0;right:0;background:#c7653f;border-radius:8px}
+.price-slider input[type=range]{position:absolute;inset:0;width:100%;height:38px;margin:0;background:transparent;appearance:none;-webkit-appearance:none;pointer-events:none;border:0;outline:none}
+.price-slider input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:23px;height:23px;border:2px solid #c7653f;border-radius:50%;background:#fff;box-shadow:0 2px 6px #0002;pointer-events:auto;cursor:grab}
+.price-slider input[type=range]::-moz-range-thumb{width:20px;height:20px;border:2px solid #c7653f;border-radius:50%;background:#fff;pointer-events:auto;cursor:grab}
+.price-slider input[type=range]:focus-visible::-webkit-slider-thumb{outline:3px solid #e9b69e;outline-offset:2px}
+.price-slider input[type=range]:focus-visible::-moz-range-thumb{outline:3px solid #e9b69e;outline-offset:2px}
+#priceReset{background:none;border:0;padding:4px;color:#a75d41;font-size:11px}
+@media(max-width:720px){.filter-selects .price-range{flex-basis:100%}.filter-selects #sort{flex-basis:100%}}
+</style></head>
 <body>
 <div id="runtimeNotice" role="alert"><strong>⚠️ 버튼이 눌리지 않나요?</strong>HTML 미리보기에서는 버튼이 작동하지 않을 수 있습니다. <b>웹사이트 주소를 Safari 또는 Chrome에서 열어 주세요.</b></div>
 <header class="site-head"><div class="wrap head-inner"><div class="brand"><span class="brand-mark" aria-hidden="true">🍽</span> 점심수첩</div><div class="head-meta">📍 서울 중구 삼일대로 343<br>대신파이낸스센터 주변</div></div></header>
@@ -202,7 +218,7 @@ body{background:#faf8f5;color:#282728}
         <div class="category-row" id="categories" aria-label="음식 종류 필터"></div>
         <div class="type-row" id="types" aria-label="메뉴별 필터"></div>
         <div class="filter-bottom">
-          <div class="filter-selects"><select id="budget" aria-label="1인 메뉴 예산"><option value="0">가격 제한 없음</option><option value="8000">8,000원 이하</option><option value="10000">10,000원 이하</option><option value="12000">12,000원 이하</option><option value="15000">15,000원 이하</option><option value="20000">20,000원 이하</option></select><select id="sort" aria-label="식당 정렬"><option value="default">추천순</option><option value="price">가격 낮은 순</option><option value="rating">평점 높은 순</option><option value="reviews">후기 많은 순</option><option value="name">이름순</option></select></div>
+          <div class="filter-selects"><div class="price-range"><div class="price-range-head"><label for="priceMin">가격 범위</label><output id="priceRangeValue">전체 가격</output></div><div class="price-slider"><div class="price-track"><div id="priceFill"></div></div><input id="priceMin" type="range" min="0" max="60000" step="500" value="0" aria-label="최소 가격"><input id="priceMax" type="range" min="0" max="60000" step="500" value="60000" aria-label="최대 가격"></div><div class="price-range-ends"><span>0원</span><button type="button" id="priceReset">가격 초기화</button><span>60,000원+</span></div></div><select id="sort" aria-label="식당 정렬"><option value="default">추천순</option><option value="price">가격 낮은 순</option><option value="rating">평점 높은 순</option><option value="reviews">후기 많은 순</option><option value="name">이름순</option></select></div>
           <div class="control-line"><label class="check"><input type="checkbox" id="favoriteOnly">즐겨찾기만</label><label class="check"><input type="checkbox" id="excludeRecent" checked>최근 먹은 곳 제외</label><button id="clearFilters" class="clear-btn">초기화</button></div>
         </div>
       </section>
@@ -260,7 +276,7 @@ function tidyCat(r){
 all.forEach(r=>{r.category=tidyCat(r);r.href='https://map.naver.com/p/search/'+encodeURIComponent(r.name+' '+r.address);});
 const categories=['전체','한식','중식','일식','양식','분식','아시아·세계','구내식당','간식·카페'];
 const quickTypes=[['전체','전체 메뉴'],['국밥·탕','국밥·탕'],['찌개·전골','찌개'],['고기·구이','고기'],['돈카츠','돈카츠'],['중화면','중식 면'],['국수·수제비','칼국수'],['소바·우동','우동·소바'],['밥·죽','밥·덮밥'],['샐러드·포케','샐러드·포케'],['버거·샌드위치','버거'],['쌀국수·베트남 요리','쌀국수'],['김밥·밥버거','김밥'],['백반·정식','백반·정식']];
-let filters={category:'전체',type:'전체',search:'',budget:0,sort:'default',favoriteOnly:false,excludeRecent:true};
+let filters={category:'전체',type:'전체',search:'',minPrice:0,maxPrice:60000,sort:'default',favoriteOnly:false,excludeRecent:true};
 let shownCount=16,selectedId=null,selectedMenu=null,lastRecommendedIds=[];
 const fmt=v=>v==null?'가격 확인 필요':Number(v).toLocaleString('ko-KR')+'원';
 const esc=x=>String(x??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -268,7 +284,7 @@ const isMeal=m=>m.type!=='사이드·디저트' && !/^(?:참치마요|연어톡�
 function candidates(r){
  const search=filters.search.trim().toLocaleLowerCase('ko');
  const relevant=r.menus.filter(m=>filters.type==='전체'||m.type===filters.type);
- let valid=relevant.filter(m=>filters.budget===0||(m.price!=null&&m.price<=filters.budget));
+ let valid=relevant.filter(m=>(filters.minPrice===0&&filters.maxPrice===60000)||(m.price!=null&&m.price>=filters.minPrice&&(filters.maxPrice===60000||m.price<=filters.maxPrice)));
  if(search){let s=search.replace(/\s+/g,'');let hay=(r.name+' '+r.address).toLocaleLowerCase('ko').replace(/\s+/g,'');if(!hay.includes(s))valid=valid.filter(m=>(m.name+' '+m.type).toLocaleLowerCase('ko').replace(/\s+/g,'').includes(s));}
  return valid;
 }
@@ -356,19 +372,29 @@ function seedDay(){let d=new Date();return [d.getFullYear(),d.getMonth()+1,d.get
 function suggest(force=false){let list=filtered();const meals=list.filter(r=>isMeal(r.shownMenu)&&r.category!=='간식·카페');if(meals.length)list=meals;if(!list.length){selectedId=null;selectedMenu=null;$('todayName').textContent='조건에 맞는 후보가 없어요';$('todayMenu').textContent='가격 또는 음식 필터를 바꿔보세요.';$('todayPrice').textContent='—';$('todayAddress').textContent='';$('todayAte').disabled=true;$('todayMap').style.pointerEvents='none';$('todayMap').setAttribute('aria-disabled','true');return;}
  $('todayAte').disabled=false;$('todayMap').style.pointerEvents='';$('todayMap').removeAttribute('aria-disabled');
  let pool=list.filter(r=>!lastRecommendedIds.includes(r.id));if(!pool.length)pool=list;
- let i=force?Math.floor(Math.random()*pool.length):hash(seedDay()+JSON.stringify({cat:filters.category,type:filters.type,budget:filters.budget,search:filters.search,fav:filters.favoriteOnly,recent:filters.excludeRecent}))+state.history.length;
+ let i=force?Math.floor(Math.random()*pool.length):hash(seedDay()+JSON.stringify({cat:filters.category,type:filters.type,minPrice:filters.minPrice,maxPrice:filters.maxPrice,search:filters.search,fav:filters.favoriteOnly,recent:filters.excludeRecent}))+state.history.length;
  let r=pool[i%pool.length];selectedId=r.id;selectedMenu=r.shownMenu;lastRecommendedIds=[r.id,...lastRecommendedIds].slice(0,8);
  $('todayName').textContent=r.name;$('todayMenu').textContent=selectedMenu.name;$('todayPrice').textContent=fmt(selectedMenu.price);$('todayAddress').textContent='📍 '+r.address;$('todayMap').href=r.href;
 }
 function changeFilters(){shownCount=16;lastRecommendedIds=[];renderChips();renderResults();suggest(false);}
 function renderAll(){renderChips();renderResults();renderSide();suggest(false);}
-function showRestaurant(id){const r=byId.get(id);if(!r)return;filters={category:'전체',type:'전체',search:r.name,budget:0,sort:'default',favoriteOnly:false,excludeRecent:false};syncFilters();changeFilters();requestAnimationFrame(()=>{let e=$('restaurant-'+id);if(e){e.scrollIntoView({behavior:'smooth',block:'center'});e.querySelector('details').open=true;}});}
-function syncFilters(){$('search').value=filters.search;$('budget').value=String(filters.budget);$('sort').value=filters.sort;$('favoriteOnly').checked=filters.favoriteOnly;$('excludeRecent').checked=filters.excludeRecent;}
-function clearFilters(){filters={category:'전체',type:'전체',search:'',budget:0,sort:'default',favoriteOnly:false,excludeRecent:true};syncFilters();changeFilters();}
+function showRestaurant(id){const r=byId.get(id);if(!r)return;filters={category:'전체',type:'전체',search:r.name,minPrice:0,maxPrice:60000,sort:'default',favoriteOnly:false,excludeRecent:false};syncFilters();changeFilters();requestAnimationFrame(()=>{let e=$('restaurant-'+id);if(e){e.scrollIntoView({behavior:'smooth',block:'center'});e.querySelector('details').open=true;}});}
+function syncFilters(){$('search').value=filters.search;syncPriceRange();$('sort').value=filters.sort;$('favoriteOnly').checked=filters.favoriteOnly;$('excludeRecent').checked=filters.excludeRecent;}
+function clearFilters(){filters={category:'전체',type:'전체',search:'',minPrice:0,maxPrice:60000,sort:'default',favoriteOnly:false,excludeRecent:true};syncFilters();changeFilters();}
 function renderDialog(){const hidden=$('hiddenList');hidden.replaceChildren();if(!state.hidden.length)hidden.innerHTML='<div class="muted">숨긴 식당이 없어요.</div>';else state.hidden.forEach(id=>{let r=byId.get(id);if(!r)return;const div=document.createElement('div');div.className='mini-item';div.innerHTML=`<strong>${esc(r.emoji)} ${esc(r.name)}</strong><button type="button">복원</button>`;div.querySelector('button').onclick=()=>{state.hidden=state.hidden.filter(x=>x!==id);persist();renderAll();renderDialog();};hidden.append(div);});
  const hist=$('fullHistory');hist.replaceChildren();if(!state.history.length)hist.innerHTML='<div class="muted">식사 기록이 없어요.</div>';else state.history.forEach((h,i)=>{let r=byId.get(h.id);if(!r)return;const div=document.createElement('div');div.className='mini-item';div.innerHTML=`<div><strong>${esc(r.emoji)} ${esc(r.name)}</strong><small>${esc(new Date(h.ts).toLocaleDateString('ko-KR'))} · ${esc(h.menu)}</small></div><button type="button">삭제</button>`;div.querySelector('button').onclick=()=>{state.history.splice(i,1);persist();renderAll();renderDialog();};hist.append(div);});}
 $('search').oninput=e=>{filters.search=e.target.value;changeFilters();};
-$('budget').onchange=e=>{filters.budget=+e.target.value;changeFilters();};
+const PRICE_LIMIT=60000;
+function syncPriceRange(){
+ const lo=$('priceMin'),hi=$('priceMax');lo.value=String(filters.minPrice);hi.value=String(filters.maxPrice);
+ $('priceRangeValue').textContent=filters.minPrice===0&&filters.maxPrice===PRICE_LIMIT?'전체 가격':filters.minPrice.toLocaleString('ko-KR')+'원 ~ '+(filters.maxPrice===PRICE_LIMIT?'제한 없음':filters.maxPrice.toLocaleString('ko-KR')+'원');
+ $('priceFill').style.left=(filters.minPrice/PRICE_LIMIT*100)+'%';
+ $('priceFill').style.right=(100-filters.maxPrice/PRICE_LIMIT*100)+'%';
+}
+$('priceMin').oninput=e=>{filters.minPrice=Math.min(+e.target.value,filters.maxPrice);syncPriceRange();changeFilters();};
+$('priceMax').oninput=e=>{filters.maxPrice=Math.max(+e.target.value,filters.minPrice);syncPriceRange();changeFilters();};
+$('priceReset').onclick=()=>{filters.minPrice=0;filters.maxPrice=PRICE_LIMIT;syncPriceRange();changeFilters();};
+syncPriceRange();
 $('sort').onchange=e=>{filters.sort=e.target.value;renderResults();};
 $('favoriteOnly').onchange=e=>{filters.favoriteOnly=e.target.checked;changeFilters();};
 $('excludeRecent').onchange=e=>{filters.excludeRecent=e.target.checked;changeFilters();};
@@ -480,7 +506,7 @@ $('teamReroll').onclick=()=>newTeam(true);
 $('teamDate').textContent=new Intl.DateTimeFormat('ko-KR',{month:'long',day:'numeric',weekday:'short'}).format(new Date());
 if(teamState?.day===seedDay()&&teamState.key===teamKey()&&Array.isArray(teamState.ids)&&teamState.ids.length){
  const pool=teamPool();currentPicks=teamState.ids.map(id=>pool.find(x=>x.r.id===id)).filter(Boolean);
- if(currentPicks.length===teamState.ids.length){chosenId=teamState.chosenId||null;previousIds=currentPicks.map(x=>x.r.id);}else newTeam();
+ if(currentPicks.length===teamState.ids.length){chosenId=teamState.chosenId||null;previousIds=currentPicks.map(x=>x.r.id);renderTeam();}else newTeam();
 }else newTeam();
 $('totalCount').textContent=all.length;
 // Interactive initialization completed successfully.
