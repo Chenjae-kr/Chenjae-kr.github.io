@@ -212,11 +212,14 @@ body{background:#faf8f5;color:#282728}
 .recommend-exclude-btn:hover{color:#a84f3d;background:#fff8f5}
 .search-exclusion-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 </style><style id="result-sort-style">
-.result-sort{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:0 2px 13px}
-.result-sort button{appearance:none;white-space:nowrap;background:#fff;color:#5c5550;border:1px solid #e6dfd9;border-radius:9px;min-height:36px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.list-head{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+.list-head h2{flex:0 0 auto;white-space:nowrap}
+.result-sort{display:flex;align-items:center;flex-wrap:nowrap;gap:5px;margin:0;min-width:0;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.result-sort::-webkit-scrollbar{display:none}
+.result-sort button{flex:0 0 auto;appearance:none;white-space:nowrap;background:#fff;color:#5c5550;border:1px solid #e6dfd9;border-radius:9px;min-height:36px;padding:7px 10px;font-size:12px;font-weight:700;cursor:pointer}
 .result-sort button[aria-pressed="true"]{background:#fff0e7;color:#a74e30;border-color:#dfa88c}
-.result-sort button:focus-visible{outline:2px solid #c7653f;outline-offset:2px}
-@media(max-width:720px){.result-sort{gap:5px}.result-sort button{padding:7px 10px}}
+.result-sort button:focus-visible{outline:2px solid #c7653f;outline-offset:-2px}
+@media(max-width:720px){.list-head{gap:6px}.list-head h2{font-size:16px}.list-head .muted{font-size:11px;margin-left:3px}.result-sort{gap:4px}.result-sort button{min-height:34px;padding:6px 8px;font-size:11px}}
 </style></head>
 <body>
 <div id="runtimeNotice" role="alert"><strong>⚠️ 버튼이 눌리지 않나요?</strong>HTML 미리보기에서는 버튼이 작동하지 않을 수 있습니다. <b>웹사이트 주소를 Safari 또는 Chrome에서 열어 주세요.</b></div>
@@ -276,14 +279,15 @@ body{background:#faf8f5;color:#282728}
           <div class="control-line"><label class="check"><input type="checkbox" id="favoriteOnly">즐겨찾기만</label><label class="check"><input type="checkbox" id="excludeRecent" checked>최근 먹은 곳 제외</label><button id="clearFilters" class="clear-btn">초기화</button></div>
         </div>
       </section>
-      <div class="list-head"><h2>검색 결과 <span id="resultCount" class="muted" aria-live="polite"></span></h2></div>
+      <div class="list-head"><h2>식당 둘러보기 <span id="resultCount" class="muted" aria-live="polite"></span></h2>
       <div id="resultSort" class="result-sort" role="group" aria-label="검색 결과 정렬">
-        <button type="button" data-sort="default" aria-pressed="true">추천순</button>
         <button type="button" data-sort="distance" aria-pressed="false">거리순 ↑</button>
         <button type="button" data-sort="price" aria-pressed="false">가격순 ↑</button>
+        <button type="button" data-sort="default" aria-pressed="true">추천순</button>
         <button type="button" data-sort="rating" aria-pressed="false">평점순</button>
         <button type="button" data-sort="reviews" aria-pressed="false">후기순</button>
         <button type="button" data-sort="name" aria-pressed="false">이름순</button>
+      </div>
       </div>
       <div id="results" class="rest-grid"></div>
       <button class="btn more" id="moreBtn" hidden>더 보기 +</button>
