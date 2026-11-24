@@ -224,7 +224,7 @@ body{background:#faf8f5;color:#282728}
     <div class="team-toolbar">
       <label>1인 예산 <select id="teamBudget" aria-label="추천 1인 예산"><option value="15000">15,000원 이하</option><option value="10000">10,000원 이하</option><option value="12000">12,000원 이하</option><option value="20000">20,000원 이하</option><option value="0">가격 제한 없음</option></select></label>
       <label class="category-select-label">음식 종류 <select id="teamCategory" aria-label="추천 음식 종류"><option value="전체">전체 메뉴</option><option value="한식">한식</option><option value="중식">중식</option><option value="일식">일식</option><option value="양식">양식</option><option value="분식">분식</option><option value="아시아·세계">아시아·세계</option><option value="구내식당">구내식당</option></select></label>
-      <label class="team-distance-label">회사에서 거리 (직선) <select id="teamDistance" aria-label="추천 거리 제한"><option value="0">거리 제한 없음</option><option value="300">300m 이내</option><option value="500">500m 이내</option><option value="700">700m 이내</option><option value="1000">1km 이내</option><option value="1500">1.5km 이내</option><option value="2000">2km 이내</option></select></label>
+      <label class="team-distance-label">회사에서 거리 (직선) <select id="teamDistance" aria-label="추천 거리 제한"><option value="0">거리 제한 없음</option><option value="300">300m 이내</option><option value="500" selected>500m 이내</option><option value="700">700m 이내</option><option value="1000">1km 이내</option><option value="1500">1.5km 이내</option><option value="2000">2km 이내</option></select></label>
       <button type="button" class="btn team-refresh" id="teamReroll">↻ 후보 다시 뽑기</button>
     </div>
     <div class="category-visual-wrap" aria-labelledby="teamCategoryVisualTitle">
@@ -597,7 +597,12 @@ const day=new Intl.DateTimeFormat('ko-KR',{month:'long',day:'numeric',weekday:'s
 renderAll();
 
 // Three-restaurant decision panel. No polls or votes.
-const prefs={budget:state.teamPrefs?.budget??15000,category:state.teamPrefs?.category??'전체',maxDistance:[0,300,500,700,1000,1500,2000].includes(Number(state.teamPrefs?.maxDistance))?Number(state.teamPrefs.maxDistance):0};
+function initialRecommendDistance(saved){
+ const value=Number(saved?.maxDistance);
+ if(![0,300,500,700,1000,1500,2000].includes(value))return 500;
+ return value===0&&saved?.distanceDefaultVersion!==1?500:value;
+}
+const prefs={budget:state.teamPrefs?.budget??15000,category:state.teamPrefs?.category??'전체',maxDistance:initialRecommendDistance(state.teamPrefs),distanceDefaultVersion:1};
 function renderTeamCategoryButtons(){
  const row=$('teamCategoryButtons');if(!row)return;
  renderPhotoCategories(row,categories.slice(0,8),prefs.category,value=>{prefs.category=value;$('teamCategory').value=value;newTeam(true);});
