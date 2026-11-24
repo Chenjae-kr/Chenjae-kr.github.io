@@ -211,6 +211,12 @@ body{background:#faf8f5;color:#282728}
 .recommend-exclude-btn{min-height:35px;margin-top:2px;padding:6px 10px;border:0;border-top:1px solid #eee8e2;background:transparent;color:#817771;font-size:12px;font-weight:650;text-align:center}
 .recommend-exclude-btn:hover{color:#a84f3d;background:#fff8f5}
 .search-exclusion-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+</style><style id="result-sort-style">
+.result-sort{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:0 2px 13px}
+.result-sort button{appearance:none;white-space:nowrap;background:#fff;color:#5c5550;border:1px solid #e6dfd9;border-radius:9px;min-height:36px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.result-sort button[aria-pressed="true"]{background:#fff0e7;color:#a74e30;border-color:#dfa88c}
+.result-sort button:focus-visible{outline:2px solid #c7653f;outline-offset:2px}
+@media(max-width:720px){.result-sort{gap:5px}.result-sort button{padding:7px 10px}}
 </style></head>
 <body>
 <div id="runtimeNotice" role="alert"><strong>⚠️ 버튼이 눌리지 않나요?</strong>HTML 미리보기에서는 버튼이 작동하지 않을 수 있습니다. <b>웹사이트 주소를 Safari 또는 Chrome에서 열어 주세요.</b></div>
@@ -266,11 +272,19 @@ body{background:#faf8f5;color:#282728}
         <div class="category-row category-visual-row" id="categories" role="group" aria-label="음식 종류 필터"></div>
         <div class="type-row" id="types" aria-label="메뉴별 필터"></div>
         <div class="filter-bottom">
-          <div class="filter-selects"><div class="price-range"><div class="price-range-head"><label id="priceLabel">가격 범위</label><output id="priceRangeValue">전체 가격</output></div><div class="price-slider" id="priceSlider" role="group" aria-label="가격 범위 선택"><div class="price-track"><div id="priceFill"></div></div><button type="button" class="price-thumb" id="priceMin" role="slider" aria-label="최소 가격" aria-valuemin="0" aria-valuemax="60000" aria-valuenow="0"></button><button type="button" class="price-thumb" id="priceMax" role="slider" aria-label="최대 가격" aria-valuemin="0" aria-valuemax="60000" aria-valuenow="60000"></button></div><div class="price-range-ends"><span>0원</span><button type="button" id="priceReset">가격 초기화</button><span>60,000원+</span></div></div><div class="distance-filter"><label for="distanceLimit">회사에서 거리 <span>(직선)</span></label><select id="distanceLimit"><option value="0">거리 제한 없음</option><option value="300">300m 이내</option><option value="500">500m 이내</option><option value="700">700m 이내</option><option value="1000">1km 이내</option><option value="1500">1.5km 이내</option><option value="2000">2km 이내</option></select><small id="distanceFilterNote"></small></div><select id="sort" aria-label="식당 정렬"><option value="default">추천순</option><option value="distance">가까운 순</option><option value="price">가격 낮은 순</option><option value="rating">평점 높은 순</option><option value="reviews">후기 많은 순</option><option value="name">이름순</option></select></div>
+          <div class="filter-selects"><div class="price-range"><div class="price-range-head"><label id="priceLabel">가격 범위</label><output id="priceRangeValue">전체 가격</output></div><div class="price-slider" id="priceSlider" role="group" aria-label="가격 범위 선택"><div class="price-track"><div id="priceFill"></div></div><button type="button" class="price-thumb" id="priceMin" role="slider" aria-label="최소 가격" aria-valuemin="0" aria-valuemax="60000" aria-valuenow="0"></button><button type="button" class="price-thumb" id="priceMax" role="slider" aria-label="최대 가격" aria-valuemin="0" aria-valuemax="60000" aria-valuenow="60000"></button></div><div class="price-range-ends"><span>0원</span><button type="button" id="priceReset">가격 초기화</button><span>60,000원+</span></div></div><div class="distance-filter"><label for="distanceLimit">회사에서 거리 <span>(직선)</span></label><select id="distanceLimit"><option value="0">거리 제한 없음</option><option value="300">300m 이내</option><option value="500">500m 이내</option><option value="700">700m 이내</option><option value="1000">1km 이내</option><option value="1500">1.5km 이내</option><option value="2000">2km 이내</option></select><small id="distanceFilterNote"></small></div></div>
           <div class="control-line"><label class="check"><input type="checkbox" id="favoriteOnly">즐겨찾기만</label><label class="check"><input type="checkbox" id="excludeRecent" checked>최근 먹은 곳 제외</label><button id="clearFilters" class="clear-btn">초기화</button></div>
         </div>
       </section>
-      <div class="list-head"><h2>식당 둘러보기 <span id="resultCount" class="muted" aria-live="polite"></span></h2></div>
+      <div class="list-head"><h2>검색 결과 <span id="resultCount" class="muted" aria-live="polite"></span></h2></div>
+      <div id="resultSort" class="result-sort" role="group" aria-label="검색 결과 정렬">
+        <button type="button" data-sort="default" aria-pressed="true">추천순</button>
+        <button type="button" data-sort="distance" aria-pressed="false">거리순 ↑</button>
+        <button type="button" data-sort="price" aria-pressed="false">가격순 ↑</button>
+        <button type="button" data-sort="rating" aria-pressed="false">평점순</button>
+        <button type="button" data-sort="reviews" aria-pressed="false">후기순</button>
+        <button type="button" data-sort="name" aria-pressed="false">이름순</button>
+      </div>
       <div id="results" class="rest-grid"></div>
       <button class="btn more" id="moreBtn" hidden>더 보기 +</button>
       <div class="foot-note">※ 가격·영업시간은 변경될 수 있습니다. 거리는 대신파이낸스센터(삼일대로 343)와 등록 주소 좌표 간 직선거리이며, 실제 도보거리와 다릅니다.</div>
@@ -401,6 +415,11 @@ function syncDistanceFilter(){
  const known=all.filter(r=>Number.isFinite(r.distanceM)).length;
  $('distanceFilterNote').textContent=filters.maxDistance?'거리 미확인 식당 제외':'거리 확인 '+known+' / '+all.length+'곳';
 }
+function compareKnownAscending(a,b){
+ const ak=Number.isFinite(a),bk=Number.isFinite(b);
+ if(ak!==bk)return ak?-1:1;
+ return ak?a-b:0;
+}
 function filtered(){const recent=recentIds();let list=all.filter(r=>{
  if(state.hidden.includes(r.id))return false;
  if(filters.category!=='전체'&&r.category!==filters.category)return false;
@@ -410,8 +429,8 @@ function filtered(){const recent=recentIds();let list=all.filter(r=>{
  return !!candidates(r).length;
  }).map(r=>({...r,shownMenu:bestMenu(r)}));
  const rating=(a,b)=>b.rating-a.rating||b.reviews-a.reviews;
- if(filters.sort==='distance')list.sort((a,b)=>((a.distanceM??Infinity)-(b.distanceM??Infinity))||rating(a,b));
- else if(filters.sort==='price')list.sort((a,b)=>a.shownMenu.price-b.shownMenu.price||rating(a,b));
+ if(filters.sort==='distance')list.sort((a,b)=>compareKnownAscending(a.distanceM,b.distanceM)||rating(a,b));
+ else if(filters.sort==='price')list.sort((a,b)=>compareKnownAscending(a.shownMenu?.price,b.shownMenu?.price)||rating(a,b));
  else if(filters.sort==='rating')list.sort(rating);
  else if(filters.sort==='reviews')list.sort((a,b)=>b.reviews-a.reviews||rating(a,b));
  else if(filters.sort==='name')list.sort((a,b)=>a.name.localeCompare(b.name,'ko'));
@@ -496,7 +515,7 @@ function openMenuDialog(id){
 }
 $('menuDialogClose').onclick=()=>$('menuDialog').close();
 $('menuDialog').addEventListener('click',e=>{if(e.target===$('menuDialog'))$('menuDialog').close();});
-function renderResults(){const list=filtered();$('resultCount').textContent=list.length+'곳';$('results').replaceChildren();if(!list.length){$('results').innerHTML='<div class="empty"><h3>조건에 맞는 식당이 없습니다.</h3><p>예산이나 필터를 변경하세요.</p><button class="btn" id="emptyReset">전체 식당 보기</button></div>';$('emptyReset').onclick=clearFilters;$('moreBtn').hidden=true;return;}
+function renderResults(){syncResultSort();const list=filtered();$('resultCount').textContent=list.length+'곳';$('results').replaceChildren();if(!list.length){$('results').innerHTML='<div class="empty"><h3>조건에 맞는 식당이 없습니다.</h3><p>예산이나 필터를 변경하세요.</p><button class="btn" id="emptyReset">전체 식당 보기</button></div>';$('emptyReset').onclick=clearFilters;$('moreBtn').hidden=true;return;}
  const fragment=document.createDocumentFragment();list.slice(0,shownCount).forEach(r=>fragment.append(drawCard(r)));$('results').append(fragment);$('moreBtn').hidden=list.length<=shownCount;$('moreBtn').textContent='더 보기 + ('+Math.min(16,list.length-shownCount)+'곳)';}
 function formatHistoryDate(ts){let d=new Date(ts);const today=new Date();return d.toDateString()===today.toDateString()?'오늘':`${d.getMonth()+1}/${d.getDate()}`;}
 function renderSide(){const fav=$('favorites');fav.replaceChildren();let favs=state.favorites.map(id=>byId.get(id)).filter(Boolean);if(!favs.length){fav.innerHTML='<div class="muted">즐겨찾기 없음</div>';}else favs.slice(0,4).forEach(r=>{const el=document.createElement('div');el.className='mini-item';el.innerHTML=`<div><strong>${esc(r.emoji)} ${esc(r.name)}</strong><small>${esc(r.category)}</small></div><button type="button">보기 →</button>`;el.querySelector('button').onclick=()=>showRestaurant(r.id);fav.append(el);});
@@ -515,7 +534,7 @@ function suggest(force=false){let list=filtered().filter(r=>!state.recommendExcl
 function changeFilters(){shownCount=16;lastRecommendedIds=[];renderChips();renderResults();suggest(false);}
 function renderAll(){renderChips();renderResults();renderSide();suggest(false);}
 function showRestaurant(id){const r=byId.get(id);if(!r)return;switchLunchTab('search',false);filters={category:'전체',type:'전체',search:r.name,minPrice:0,maxPrice:60000,maxDistance:0,sort:'default',favoriteOnly:false,excludeRecent:false};syncFilters();changeFilters();requestAnimationFrame(()=>{let e=$('restaurant-'+id);if(e){e.scrollIntoView({behavior:'smooth',block:'center'});e.querySelector('details').open=true;}});}
-function syncFilters(){$('search').value=filters.search;syncPriceRange();syncDistanceFilter();$('sort').value=filters.sort;$('favoriteOnly').checked=filters.favoriteOnly;$('excludeRecent').checked=filters.excludeRecent;}
+function syncFilters(){$('search').value=filters.search;syncPriceRange();syncDistanceFilter();syncResultSort();$('favoriteOnly').checked=filters.favoriteOnly;$('excludeRecent').checked=filters.excludeRecent;}
 function clearFilters(){filters={category:'전체',type:'전체',search:'',minPrice:0,maxPrice:60000,maxDistance:0,sort:'default',favoriteOnly:false,excludeRecent:true};syncFilters();changeFilters();}
 function renderDialog(){renderRecommendExcludedList();const hidden=$('hiddenList');hidden.replaceChildren();if(!state.hidden.length)hidden.innerHTML='<div class="muted">숨긴 식당이 없어요.</div>';else state.hidden.forEach(id=>{let r=byId.get(id);if(!r)return;const div=document.createElement('div');div.className='mini-item';div.innerHTML=`<strong>${esc(r.emoji)} ${esc(r.name)}</strong><button type="button">복원</button>`;div.querySelector('button').onclick=()=>{state.hidden=state.hidden.filter(x=>x!==id);persist();renderAll();refreshTeamAfterExclusion();renderDialog();};hidden.append(div);});
  const hist=$('fullHistory');hist.replaceChildren();if(!state.history.length)hist.innerHTML='<div class="muted">식사 기록이 없어요.</div>';else state.history.forEach((h,i)=>{let r=byId.get(h.id);if(!r)return;const div=document.createElement('div');div.className='mini-item';div.innerHTML=`<div><strong>${esc(r.emoji)} ${esc(r.name)}</strong><small>${esc(new Date(h.ts).toLocaleDateString('ko-KR'))} · ${esc(h.menu)}</small></div><button type="button">삭제</button>`;div.querySelector('button').onclick=()=>{state.history.splice(i,1);persist();renderAll();renderDialog();};hist.append(div);});}
@@ -579,7 +598,16 @@ for(const which of ['min','max']){
 $('priceReset').onclick=()=>{filters.minPrice=0;filters.maxPrice=PRICE_LIMIT;syncPriceRange();changeFilters();};
 syncPriceRange();
 $('distanceLimit').onchange=e=>{filters.maxDistance=+e.target.value;syncDistanceFilter();changeFilters();};
-$('sort').onchange=e=>{filters.sort=e.target.value;renderResults();};
+function syncResultSort(){
+ for(const btn of $('resultSort').querySelectorAll('[data-sort]')){
+  const active=btn.dataset.sort===filters.sort;
+  btn.setAttribute('aria-pressed',String(active));
+ }
+}
+$('resultSort').addEventListener('click',e=>{
+ const btn=e.target.closest('button[data-sort]');if(!btn)return;
+ filters.sort=btn.dataset.sort;shownCount=16;renderResults();
+});
 $('favoriteOnly').onchange=e=>{filters.favoriteOnly=e.target.checked;changeFilters();};
 $('excludeRecent').onchange=e=>{filters.excludeRecent=e.target.checked;changeFilters();};
 $('clearFilters').onclick=clearFilters;
