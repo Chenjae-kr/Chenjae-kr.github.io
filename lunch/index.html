@@ -151,18 +151,20 @@ body{background:#faf8f5;color:#282728}
 </style>
 <style id="price-range-style">
 .filter-selects{flex-wrap:wrap;align-items:center}
-.price-range{flex:1 1 230px;min-width:0;padding:10px 12px;background:#fff;border:1px solid #e9e4df;border-radius:12px}
+.price-range{flex:1 1 100%;min-width:0;padding:12px 14px;background:#fff;border:1px solid #e9e4df;border-radius:12px}
 .price-range-head,.price-range-ends{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;color:#77716d}
 .price-range-head label{font-weight:750;color:#403a37}
 #priceRangeValue{color:#a74e30;font-weight:750;text-align:right}
-.price-slider{height:38px;position:relative;margin:2px 10px}
-.price-track{position:absolute;top:16px;height:6px;left:0;right:0;border-radius:8px;background:#e9e4df}
+.price-slider{position:relative;height:48px;margin:4px 17px;touch-action:none;user-select:none;cursor:pointer}
+.price-track{position:absolute;top:21px;height:6px;left:0;right:0;border-radius:8px;background:#e9e4df;pointer-events:none}
 #priceFill{position:absolute;top:0;bottom:0;left:0;right:0;background:#c7653f;border-radius:8px}
-.price-slider input[type=range]{position:absolute;inset:0;width:100%;height:38px;margin:0;background:transparent;appearance:none;-webkit-appearance:none;pointer-events:none;border:0;outline:none}
-.price-slider input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:23px;height:23px;border:2px solid #c7653f;border-radius:50%;background:#fff;box-shadow:0 2px 6px #0002;pointer-events:auto;cursor:grab}
-.price-slider input[type=range]::-moz-range-thumb{width:20px;height:20px;border:2px solid #c7653f;border-radius:50%;background:#fff;pointer-events:auto;cursor:grab}
-.price-slider input[type=range]:focus-visible::-webkit-slider-thumb{outline:3px solid #e9b69e;outline-offset:2px}
-.price-slider input[type=range]:focus-visible::-moz-range-thumb{outline:3px solid #e9b69e;outline-offset:2px}
+.price-thumb{position:absolute;top:24px;left:0;transform:translate(-50%,-50%);width:40px;height:44px;border:0;background:transparent;padding:0;cursor:grab;touch-action:none;display:grid;place-items:center}
+.price-thumb::after{content:'';display:block;width:24px;height:24px;background:#fff;border:2px solid #c7653f;border-radius:50%;box-shadow:0 2px 5px #0002}
+.price-thumb:active{cursor:grabbing}
+.price-thumb:focus-visible{outline:none}
+.price-thumb:focus-visible::after{outline:3px solid #e9b69e;outline-offset:2px}
+#priceMin{z-index:2}#priceMax{z-index:3}
+.price-thumb.dragging{z-index:4!important}
 #priceReset{background:none;border:0;padding:4px;color:#a75d41;font-size:11px}
 @media(max-width:720px){.filter-selects .price-range{flex-basis:100%}.filter-selects #sort{flex-basis:100%}}
 </style></head>
@@ -218,7 +220,7 @@ body{background:#faf8f5;color:#282728}
         <div class="category-row" id="categories" aria-label="음식 종류 필터"></div>
         <div class="type-row" id="types" aria-label="메뉴별 필터"></div>
         <div class="filter-bottom">
-          <div class="filter-selects"><div class="price-range"><div class="price-range-head"><label for="priceMin">가격 범위</label><output id="priceRangeValue">전체 가격</output></div><div class="price-slider"><div class="price-track"><div id="priceFill"></div></div><input id="priceMin" type="range" min="0" max="60000" step="500" value="0" aria-label="최소 가격"><input id="priceMax" type="range" min="0" max="60000" step="500" value="60000" aria-label="최대 가격"></div><div class="price-range-ends"><span>0원</span><button type="button" id="priceReset">가격 초기화</button><span>60,000원+</span></div></div><select id="sort" aria-label="식당 정렬"><option value="default">추천순</option><option value="price">가격 낮은 순</option><option value="rating">평점 높은 순</option><option value="reviews">후기 많은 순</option><option value="name">이름순</option></select></div>
+          <div class="filter-selects"><div class="price-range"><div class="price-range-head"><label id="priceLabel">가격 범위</label><output id="priceRangeValue">전체 가격</output></div><div class="price-slider" id="priceSlider" role="group" aria-label="가격 범위 선택"><div class="price-track"><div id="priceFill"></div></div><button type="button" class="price-thumb" id="priceMin" role="slider" aria-label="최소 가격" aria-valuemin="0" aria-valuemax="60000" aria-valuenow="0"></button><button type="button" class="price-thumb" id="priceMax" role="slider" aria-label="최대 가격" aria-valuemin="0" aria-valuemax="60000" aria-valuenow="60000"></button></div><div class="price-range-ends"><span>0원</span><button type="button" id="priceReset">가격 초기화</button><span>60,000원+</span></div></div><select id="sort" aria-label="식당 정렬"><option value="default">추천순</option><option value="price">가격 낮은 순</option><option value="rating">평점 높은 순</option><option value="reviews">후기 많은 순</option><option value="name">이름순</option></select></div>
           <div class="control-line"><label class="check"><input type="checkbox" id="favoriteOnly">즐겨찾기만</label><label class="check"><input type="checkbox" id="excludeRecent" checked>최근 먹은 곳 제외</label><button id="clearFilters" class="clear-btn">초기화</button></div>
         </div>
       </section>
@@ -386,13 +388,60 @@ function renderDialog(){const hidden=$('hiddenList');hidden.replaceChildren();if
 $('search').oninput=e=>{filters.search=e.target.value;changeFilters();};
 const PRICE_LIMIT=60000;
 function syncPriceRange(){
- const lo=$('priceMin'),hi=$('priceMax');lo.value=String(filters.minPrice);hi.value=String(filters.maxPrice);
+ const lo=$('priceMin'),hi=$('priceMax');
+ lo.style.left=(filters.minPrice/PRICE_LIMIT*100)+'%';hi.style.left=(filters.maxPrice/PRICE_LIMIT*100)+'%';
+ lo.setAttribute('aria-valuenow',filters.minPrice);lo.setAttribute('aria-valuemax',filters.maxPrice);lo.setAttribute('aria-valuetext',filters.minPrice.toLocaleString('ko-KR')+'원');
+ hi.setAttribute('aria-valuenow',filters.maxPrice);hi.setAttribute('aria-valuemin',filters.minPrice);hi.setAttribute('aria-valuetext',filters.maxPrice===PRICE_LIMIT?'제한 없음':filters.maxPrice.toLocaleString('ko-KR')+'원');
  $('priceRangeValue').textContent=filters.minPrice===0&&filters.maxPrice===PRICE_LIMIT?'전체 가격':filters.minPrice.toLocaleString('ko-KR')+'원 ~ '+(filters.maxPrice===PRICE_LIMIT?'제한 없음':filters.maxPrice.toLocaleString('ko-KR')+'원');
  $('priceFill').style.left=(filters.minPrice/PRICE_LIMIT*100)+'%';
  $('priceFill').style.right=(100-filters.maxPrice/PRICE_LIMIT*100)+'%';
 }
-$('priceMin').oninput=e=>{filters.minPrice=Math.min(+e.target.value,filters.maxPrice);syncPriceRange();changeFilters();};
-$('priceMax').oninput=e=>{filters.maxPrice=Math.max(+e.target.value,filters.minPrice);syncPriceRange();changeFilters();};
+const priceSlider=$('priceSlider');
+let priceDrag=null;
+function setPriceHandle(which,value){
+ const v=Math.max(0,Math.min(PRICE_LIMIT,Math.round(value/500)*500));
+ if(which==='min')filters.minPrice=Math.min(v,filters.maxPrice);
+ else filters.maxPrice=Math.max(v,filters.minPrice);
+ syncPriceRange();changeFilters();
+}
+function priceAtX(x){const b=priceSlider.getBoundingClientRect();return Math.max(0,Math.min(PRICE_LIMIT,(x-b.left)/Math.max(1,b.width)*PRICE_LIMIT));}
+priceSlider.addEventListener('pointerdown',e=>{
+ if(priceDrag!==null||e.button!==0)return;
+ e.preventDefault();
+ const v=priceAtX(e.clientX);
+ let which=e.target.closest('#priceMin')?'min':e.target.closest('#priceMax')?'max':Math.abs(v-filters.minPrice)<Math.abs(v-filters.maxPrice)?'min':'max';
+ if(filters.minPrice===filters.maxPrice)which=v<=filters.minPrice?'min':'max';
+ const thumb=$(which==='min'?'priceMin':'priceMax');
+ priceDrag={id:e.pointerId,which,startX:e.clientX,startValue:which==='min'?filters.minPrice:filters.maxPrice,thumb:!!e.target.closest('.price-thumb')};
+ thumb.classList.add('dragging');thumb.focus({preventScroll:true});priceSlider.setPointerCapture(e.pointerId);
+ if(!priceDrag.thumb)setPriceHandle(which,v);
+});
+priceSlider.addEventListener('pointermove',e=>{
+ if(!priceDrag||priceDrag.id!==e.pointerId)return;
+ let v=priceAtX(e.clientX);
+ if(priceDrag.thumb)v=priceDrag.startValue+(e.clientX-priceDrag.startX)/Math.max(1,priceSlider.getBoundingClientRect().width)*PRICE_LIMIT;
+ if(filters.minPrice===filters.maxPrice&&Math.abs(e.clientX-priceDrag.startX)>3&&priceDrag.startValue===filters.minPrice){
+ priceDrag.which=e.clientX<priceDrag.startX?'min':'max';
+ }
+ setPriceHandle(priceDrag.which,v);
+});
+function finishPriceDrag(e){if(priceDrag&&priceDrag.id===e.pointerId){priceDrag=null;$('priceMin').classList.remove('dragging');$('priceMax').classList.remove('dragging');}}
+priceSlider.addEventListener('pointerup',finishPriceDrag);priceSlider.addEventListener('pointercancel',finishPriceDrag);priceSlider.addEventListener('lostpointercapture',finishPriceDrag);
+for(const which of ['min','max']){
+ const thumb=$(which==='min'?'priceMin':'priceMax');
+ thumb.addEventListener('keydown',e=>{
+ const cur=which==='min'?filters.minPrice:filters.maxPrice;
+ let v=cur;
+ if(e.key==='ArrowLeft'||e.key==='ArrowDown')v-=500;
+ else if(e.key==='ArrowRight'||e.key==='ArrowUp')v+=500;
+ else if(e.key==='PageDown')v-=5000;
+ else if(e.key==='PageUp')v+=5000;
+ else if(e.key==='Home')v=which==='min'?0:filters.minPrice;
+ else if(e.key==='End')v=which==='min'?filters.maxPrice:PRICE_LIMIT;
+ else return;
+ e.preventDefault();setPriceHandle(which,v);
+ });
+}
 $('priceReset').onclick=()=>{filters.minPrice=0;filters.maxPrice=PRICE_LIMIT;syncPriceRange();changeFilters();};
 syncPriceRange();
 $('sort').onchange=e=>{filters.sort=e.target.value;renderResults();};
